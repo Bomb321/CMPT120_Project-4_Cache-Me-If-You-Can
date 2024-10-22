@@ -1,1 +1,1 @@
-# CMPT-120-Project
+#This folder holds the report of the program.
