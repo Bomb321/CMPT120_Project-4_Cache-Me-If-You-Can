@@ -38,12 +38,12 @@ def updateStatus(reqID, newStatus):
 def deleteRequest(reqID):
     items = openFile()
     with open(filePath, mode='w', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=["ID", "Name", "Manufacturer", "Status"])
-        writer.writeheader()
+        write = csv.DictWriter(file, fieldnames=["ID", "Name", "Manufacturer", "Status"])
+        write.writeheader()
 
         for req in items:
             if req['ID'] != reqID or req['Status'] != "Rejected":
-                writer.writerow(req)
+                write.writerow(req)
 
 # Live refresh the treeview if edits are made to the csv file. Also this is where I found how to refresh because I forgot: https://stackoverflow.com/questions/76407618/how-to-refresh-data-in-treeview-in-tkinter row is replacing i.
 def refresh(tree):
@@ -66,7 +66,7 @@ def buttonHandler(tree, action):
         newStatus = "Approved"
         if updateStatus(reqID, newStatus):
             messagebox.showinfo("Success", f"Request {reqID} accepted successfully.")
-    else:  # action == "reject"
+    else:  # this is essentially action == "reject"
         deleteRequest(reqID)
         messagebox.showinfo("Success", f"Request {reqID} rejected and deleted successfully.")
     
