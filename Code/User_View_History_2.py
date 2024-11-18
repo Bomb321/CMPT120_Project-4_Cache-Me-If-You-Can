@@ -54,7 +54,7 @@ tree.grid(row=0, column=0)
 def mainMenu():
     root.destroy()
 
-#obviously this will change in the full version
+#obviously this will redirect in the full version and just terminate.
 
 btn_return = tk.Button(root, text="Return to Main Menu", command= mainMenu) #temp command for testing purposes
 btn_return.grid(row=1, column=0)
