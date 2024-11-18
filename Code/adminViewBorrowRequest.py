@@ -1,3 +1,8 @@
+'''
+Title: Admin view Borrow Requests
+Author: Zachary Outman
+Date: 11/17/2024
+'''
 import tkinter as tk
 from tkinter import ttk, messagebox
 import csv
@@ -131,7 +136,7 @@ def main():
     root.mainloop()
 
 # This is me testing a CSV file format for the program
-def create_csv():
+def createCSV():
     with open(filePath, mode='w', newline='') as file:
         write = csv.DictWriter(file, fieldnames=["ID", "Name", "Manufacturer", "Status"])
         write.writeheader()
