@@ -28,7 +28,7 @@ def updateStatus(reqID, newStatus):
     updated = False
 
     with open(filePath, mode='w', newline='') as file:
-        write = csv.DictWriter(file, fieldnames=["ID", "Name", "Manufacturer", "Status"])
+        write = csv.DictWriter(file, fieldnames=["ID", "Name", "Producer", "Status"])
         write.writeheader()
 
         for req in items:
@@ -43,7 +43,7 @@ def updateStatus(reqID, newStatus):
 def deleteRequest(reqID):
     items = openFile()
     with open(filePath, mode='w', newline='') as file:
-        write = csv.DictWriter(file, fieldnames=["ID", "Name", "Manufacturer", "Status"])
+        write = csv.DictWriter(file, fieldnames=["ID", "Name", "Producer", "Status"])
         write.writeheader()
 
         for req in items:
@@ -57,7 +57,7 @@ def refresh(tree):
 
     items = openFile()
     for req in items:
-        tree.insert("", "end", values=(req["ID"], req["Name"], req["Manufacturer"], req["Status"]))
+        tree.insert("", "end", values=(req["ID"], req["Name"], req["Producer"], req["Status"]))
 
 
 def buttonHandler(tree, action):
@@ -86,7 +86,7 @@ def main():
         # Ethan, this is where you should call your main menu function
 
     # Treeview if you want more explination here is a good video series https://www.youtube.com/watch?v=YTqDYmfccQU
-    columns = ("ID", "Name", "Manufacturer", "Status")
+    columns = ("ID", "Name", "Producer", "Status")
     tree = ttk.Treeview(root, columns=columns, show="headings")
     for col in columns:
         tree.heading(col, text=col)
@@ -106,7 +106,7 @@ def main():
     searchFrame.pack(pady=10)
 
     tk.Label(searchFrame, text="Search By:").pack(side="left", padx=5)
-    searchArea = ttk.Combobox(searchFrame, values=["ID", "Name", "Manufacturer"], state="readonly")
+    searchArea = ttk.Combobox(searchFrame, values=["ID", "Name", "Producer"], state="readonly")
     searchArea.pack(side="left", padx=5)
     searchArea.current(0)
 
@@ -127,7 +127,7 @@ def main():
             tree.delete(row)
 
         for req in results:
-            tree.insert("", "end", values=(req["ID"], req["Name"], req["Manufacturer"], req["Status"]))
+            tree.insert("", "end", values=(req["ID"], req["Name"], req["Producer"], req["Status"]))
 
     tk.Button(searchFrame, text="Search", command=searchRequests).pack(side="left", padx=5)
 
@@ -138,12 +138,12 @@ def main():
 # This is me testing a CSV file format for the program
 def createCSV():
     with open(filePath, mode='w', newline='') as file:
-        write = csv.DictWriter(file, fieldnames=["ID", "Name", "Manufacturer", "Status"])
+        write = csv.DictWriter(file, fieldnames=["ID", "Name", "Producer", "Status"])
         write.writeheader()
         write.writerows([
-            {"ID": "1", "Name": "Apple", "Manufacturer": "Farm", "Status": "Pending Approval"},
-            {"ID": "2", "Name": "Book", "Manufacturer": "Barnes & Noble", "Status": "Pending Approval"},
-            {"ID": "3", "Name": "Car", "Manufacturer": "Ford", "Status": "Pending Approval"},
+            {"ID": "1", "Name": "Apple", "Producer": "Farm", "Status": "Pending Approval"},
+            {"ID": "2", "Name": "Book", "Producer": "Barnes & Noble", "Status": "Pending Approval"},
+            {"ID": "3", "Name": "Car", "Producer": "Ford", "Status": "Pending Approval"},
         ])
 
 
