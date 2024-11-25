@@ -48,8 +48,6 @@ def display_user_count():
     messagebox.showinfo("User Count", f"There are currently {user_count} guest users.")
 
 import datetime  
-
-
 #Function which displays current date
 def display_date():
     current_date = datetime.datetime.now().strftime("%Y-%m-%d")
