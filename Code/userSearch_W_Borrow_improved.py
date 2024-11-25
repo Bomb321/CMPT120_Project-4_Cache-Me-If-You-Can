@@ -94,7 +94,6 @@ def requestToB(item=None):
         BuyOrBorrowWindow()
         DateB = datetime.now()
         DateB = DateB.date()
-        print(DateB)
         with open("BorrowList.csv", "a", newline="") as file:
             write = csv.writer(file)
             if not fileExists:
