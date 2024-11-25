@@ -95,8 +95,8 @@ def delHistory():
         
     ListRefresh() #refreshes the list
 
-
-    print(RIndex)
+# this line is for debugging -- uncomment it if you need to. 
+#    print(RIndex) 
 
     messagebox.showinfo("History", "Item Deleted! Refresh List if change is not present")
 
