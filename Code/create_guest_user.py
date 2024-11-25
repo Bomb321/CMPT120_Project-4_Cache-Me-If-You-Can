@@ -42,6 +42,21 @@ password_entry.grid(row=1, column=1, padx=10, pady=5)
 create_button = tk.Button(root, text="Create Guest User", command=create_guest_user)
 create_button.grid(row=2, column=0, columnspan=2, pady=10)
 
+#Function which shows the # of guest users
+def display_user_count():
+    user_count = len(user_database)
+    messagebox.showinfo("User Count", f"There are currently {user_count} guest users.")
+
+import datetime  
+#Function which displays current date
+def display_date():
+    current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+    messagebox.showinfo("Current Date", f"Today's date is: {current_date}")
+
+#Main menu button. Fill in Later.
+def mainMenu():
+    root.destroy()
+
 # Run the main event loop
 root.mainloop()
 
