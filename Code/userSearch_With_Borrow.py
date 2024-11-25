@@ -14,8 +14,15 @@ from tkinter import messagebox
 from tkinter import simpledialog # added to support the borrow function
 import csv
 import os
+from datetime import datetime #used to get system time
 
 filePath = "userData.csv" #You can edit the name it doesn't matter
+
+# global variables for the buy/borrow command
+BorB = "" # buy or borrow
+DurB = "" # Duration of Borrow
+DateB = "" #date and time of request
+
 
 # Function to create a favorites CSV file if it does not exist
 def createFavoritesCSV():
@@ -23,6 +30,19 @@ def createFavoritesCSV():
         with open("favorites.csv", "w", newline="") as file:
             write = csv.writer(file)
             write.writerow(["ID", "Name", "Producer"])
+            
+# and the same function to create a Borrow List CSV if it does not exist - Thomas
+def createBorrowListCSV():
+    if not os.path.exists("BorrowList.csv"):
+        with open("BorrowList.csv", "w", newline="") as file:
+            write = csv.writer(file)
+            write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request", "Approval by Admin"])
+# and again, the same thing to create the UserHistory CSV
+def createUserHistoryCSV():
+    if not os.path.exists("UserHistory.csv"):
+        with open("UserHistory.csv", "w", newline="") as file:
+            write = csv.writer(file)
+            write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request",])
 
 # # Function to load all items from the file
 def openFile():
@@ -63,56 +83,73 @@ def addToFavorites(item=None):
         messagebox.showinfo("Favorites", "Item added to favorites!")
     except Exception as errorName:
         messagebox.showerror("Error", f"An error occurred: {errorName}")
+        
 
+  
 # this is pretty much the same as the previous function but with an additional option to choose between buying an item or just borrowing it
-def requestToBuy(item=None):
+def requestToB(item=None):
     try:
         if item is None:
             selected_item = resultsList.get(tk.ACTIVE)
             if not selected_item:
-                messagebox.showwarning("Error", "Please select an item to request to buy or borrow")
+                messagebox.showwarning("Error", "Please select an item to request")
                 return
             item = dict(zip(["ID", "Name", "Producer"], [i.split(": ")[1] for i in selected_item.split(", ")]))
         fileExists = os.path.exists("BorrowList.csv") 
+        # commands to select whether to buy or borrow an item
+        BuyOrBorrowWindow()
+        DateB = datetime.now()
+        DateB = DateB.date()
+        print(DateB)
         with open("BorrowList.csv", "a", newline="") as file:
             write = csv.writer(file)
             if not fileExists:
-                write.writerow(["ID", "Name", "Producer", "Buy or borrow"])
-            write.writerow([item["ID"], item["Name"], item["Producer"], "Buy"])
-        # this segment adds a copy to the user history list
+                write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request", "Approval by Admin"])
+            write.writerow([item["ID"], item["Name"], item["Producer"], BorB, f"{DurB} days", DateB, "PENDING"])
+                      
+        # this segment adds a copy to the user history list 
+        
         with open("UserHistory.csv", "a", newline="") as file:
             write = csv.writer(file)
             if not fileExists:
-                write.writerow(["ID", "Name", "Producer",])
-            write.writerow([item["ID"], item["Name"], item["Producer"]])
+                write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request",])
+            write.writerow([item["ID"], item["Name"], item["Producer"], BorB, f"{DurB} days", DateB,])
+            
         messagebox.showinfo("Buy/Borrow list", "Item requested!")
+        print(f'BorB is equal to "{BorB}"')
+        print(f'DurB is equal to "{DurB}"')
     except Exception as errorName:
         messagebox.showerror("Error", f"An error occurred: {errorName}")
 
-def requestToBorrow(item=None):
-    duration = simpledialog.askstring("How long would you like to borrow this item? (please enter a # of days")
-    try:
-        if item is None:
-            selected_item = resultsList.get(tk.ACTIVE)
-            if not selected_item:
-                messagebox.showwarning("Error", "Please select an item to request to buy or borrow")
-                return
-            item = dict(zip(["ID", "Name", "Producer"], [i.split(": ")[1] for i in selected_item.split(", ")]))
-        fileExists = os.path.exists("BorrowList.csv") 
-        with open("BorrowList.csv", "a", newline="") as file:
-            write = csv.writer(file)
-            if not fileExists:
-                write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration"])
-            write.writerow([item["ID"], item["Name"], item["Producer"], "Borrow", (str(duration))])
-        with open("UserHistory.csv", "a", newline="") as file:
-            write = csv.writer(file)
-            if not fileExists:
-                write.writerow(["ID", "Name", "Producer",])
-            write.writerow([item["ID"], item["Name"], item["Producer"]])
-        messagebox.showinfo("Buy/Borrow list", "Item requested!")
-    except Exception as errorName:
-        messagebox.showerror("Error", f"An error occurred: {errorName}")
 
+
+    
+# creating a custom class for a 2 option window.
+class OptionsWindow(simpledialog.Dialog):
+    def body(self, master):
+        self.result= None
+        tk.Label(master, text="Are you requesting this item to buy or to borrow?").grid(row=0)
+        tk.Button(master, text="Buy", command=BuyCmd).grid(row=1)
+        tk.Button(master, text="Borrow", command=BorrowCmd).grid(row=2)
+        tk.Label(master, text="Press OK to confirm your choice!").grid(row=3)
+        
+# function to call the options window
+def BuyOrBorrowWindow():
+    OptionsWindow(root, title="Buy or Borrow this item?")
+
+  
+# fuctions for the buttons to buy or borrow -- and setting of the appropriate variables
+def BuyCmd():
+    global BorB
+    global DurB
+    BorB = "Buy"
+    DurB = "N/A"
+def BorrowCmd():
+    global BorB
+    global DurB
+    BorB = "Borrow"
+    DurB = simpledialog.askstring("Input","How many days would you like to borrow this item for?", parent = root)
+    
 # Function for the search button
 def performSearch():
     search_type = searchOption.get()
@@ -160,9 +197,10 @@ tk.Button(root, text="Add to Favorites", command=addToFavorites).pack()
 tk.Button(root, text="Clear Search", command=clearSearch).pack()
 tk.Button(root, text="Main Menu", command=root.destroy).pack() #Ethan, this is where you edit the root.destroy to call your main menu function.
 
+
 # Buttons added by Thomas to support the buy/borrow options
-tk.Button(root, text = "Buy this item", command=requestToBuy).pack()
-tk.Button(root, text = "Borrow this item", command=requestToBuy).pack()
+tk.Button(root, text = "Request this item", command=requestToB).pack()
+
 
 # Search results box
 resultsList = tk.Listbox(root, height=10, width=50)
@@ -179,7 +217,7 @@ def createCSV():
             {"ID": "3", "Name": "Car", "Producer": "Ford"},
         ])
 # Just uncomment this line to create the test CSV, you can only do this once though or you might run in to some annoying issues
-createCSV()
+#createCSV()
 
 # Run the Application
 root.mainloop()
