@@ -11,13 +11,13 @@ loginLogFile = "loginLog.csv"
 # Data storage
 users = {}
 loginAttempts = {}
+blockedUsers = {}  # Track blocked users
 
 # Configuration
 MAX_ATTEMPTS = 3
 
 # Function Definitions
 def loadUsers():
-    #Load users from the credentials file into memory.
     if os.path.exists(credFile):
         try:
             with open(credFile, "r") as f:
@@ -28,15 +28,13 @@ def loadUsers():
             messagebox.showerror("Error", f"Error reading user file: {e}")
 
 def saveUser(user, pw):
-    #Save a new user to the credentials file.#
     try:
         with open(credFile, "a", newline="") as f:
             csv.writer(f).writerow([user, pw])
     except Exception as e:
         messagebox.showerror("Error", f"Error saving user: {e}")
 
-def logLogin(user, success):
-    #Log user login attempts.
+def logLogins(user, success):
     try:
         with open(loginLogFile, "a", newline="") as file:
             writer = csv.writer(file)
@@ -45,18 +43,43 @@ def logLogin(user, success):
         messagebox.showerror("Error", f"Error logging login: {e}")
 
 def limitLoginAttempts(user):
-    #Enforce limited login attempts for security.
     if user not in loginAttempts:
         loginAttempts[user] = 0
     loginAttempts[user] += 1
 
     if loginAttempts[user] >= MAX_ATTEMPTS:
-        messagebox.showerror("Error", "Too many failed login attempts!")
-        return False  # Prevent further attempts
+        blockedUsers[user] = True  # Block user after MAX_ATTEMPTS
+        messagebox.showerror("Error", "Too many failed login attempts! Your account is now blocked.")
+        return False
     return True
 
+def viewLoginLog(root):
+    # Open a window to view login logs
+    if not os.path.exists(loginLogFile):
+        messagebox.showinfo("Info", "No login logs available.")
+        return
+
+    logWin = tk.Toplevel(root)
+    logWin.title("Login Log")
+    logWin.geometry("500x300")
+    tk.Label(logWin, text="Login Log").pack()
+
+    logText = tk.Text(logWin, wrap=tk.WORD, state=tk.DISABLED, width=60, height=15)
+    logText.pack()
+
+    try:
+        with open(loginLogFile, "r") as f:
+            logData = f.readlines()
+
+        logText.config(state=tk.NORMAL)
+        logText.delete(1.0, tk.END)
+        for entry in logData:
+            logText.insert(tk.END, entry)
+        logText.config(state=tk.DISABLED)
+    except Exception as e:
+        messagebox.showerror("Error", f"Error reading login log: {e}")
+
 def resetPassword(root):
-    #Allow a user to reset their password.
     def updatePassword():
         username = usernameEntry.get().strip()
         oldPassword = oldPwEntry.get().strip()
@@ -85,31 +108,24 @@ def resetPassword(root):
     tk.Button(resetWin, text="Update Password", command=updatePassword).pack()
 
 def logout(root):
-    #Logout the current user and return to the login screen.
     for widget in root.winfo_children():
         widget.destroy()
     setupGui(root)
 
 def displayProfile(currentUser):
-    #Display the current user's profile information.
     userType = "Admin" if currentUser == "admin" else "User"
     messagebox.showinfo("Profile Info", f"Username: {currentUser}\nType: {userType}")
 
-def goBackToLogin(root):
-    #Return to the main login screen.
-    for widget in root.winfo_children():
-        widget.destroy()
-    setupGui(root)
 
 def addMenuFeatures(root, userType, currentUser):
     if userType == "admin":
         tk.Button(root, text="Log Out", command=lambda: logout(root)).pack()
         tk.Button(root, text="Display Profile", command=lambda: displayProfile(currentUser)).pack()
+        tk.Button(root, text="View Login Log", command=lambda: viewLoginLog(root)).pack()
     else:
-        tk.Button(root, text="Log Out", command=lambda: goBackToLogin(root)).pack()
+        tk.Button(root, text="Log Out", command=lambda: logout(root)).pack()
         tk.Button(root, text="Display Profile", command=lambda: displayProfile(currentUser)).pack()
 
-# Main GUI Setup
 def setupGui(root):
     adminUser = "admin"
     adminPw = "1234"
@@ -119,21 +135,23 @@ def setupGui(root):
         user = userEntry.get().strip()
         pw = pwEntry.get().strip()
 
+        if user in blockedUsers:
+            messagebox.showerror("Error", "Your account is temporarily blocked due to too many failed attempts.")
+            return
+
         if user not in users or users[user] != pw:
             if limitLoginAttempts(user):
-                logLogin(user, False)
+                logLogins(user, False)
                 messagebox.showerror("Error", "Invalid login.")
         else:
-            logLogin(user, True)
+            logLogins(user, True)
             if user == adminUser:
                 showMenu("admin", user)
             else:
                 showMenu("user", user)
 
     def register():
-        #Open the registration window.
         def addUser():
-            #Register a new user.
             newUser = regUser.get().strip()
             newPw = regPw.get().strip()
 
@@ -159,7 +177,6 @@ def setupGui(root):
         tk.Button(regWin, text="Register", command=addUser).pack()
 
     def showMenu(userType, currentUser):
-        #Display the menu based on user type.
         for widget in root.winfo_children():
             widget.destroy()
 
@@ -174,7 +191,6 @@ def setupGui(root):
 
         addMenuFeatures(root, userType, currentUser)
 
-    # Login screen widgets
     tk.Label(root, text="Warehouse Login").pack()
     tk.Label(root, text="Username").pack()
     userEntry = tk.Entry(root)
@@ -184,9 +200,9 @@ def setupGui(root):
     pwEntry.pack()
     tk.Button(root, text="Login", command=login).pack()
     tk.Button(root, text="Register", command=register).pack()
+    tk.Button(root, text="Reset Password", command=lambda: resetPassword(root)).pack()
 
 def runApp():
-    #Run the application.
     loadUsers()
     root = tk.Tk()
     root.title("Login")
