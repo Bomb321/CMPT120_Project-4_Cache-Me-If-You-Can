@@ -14,20 +14,12 @@ from tkinter import messagebox
 
 filename = "UserHistory.csv"
 
-def createTestCSV():
-    with open(filename, 'w', newline='') as file:
-        writer = csv.writer(file)
-        fields = ['ID','Name','Producer']
-
-        writer.writerow(["1", "Hamburger", "McDonalds"])
-        writer.writerow(["2", "Book", "ABC Inc"])
-        writer.writerow(["3", "CD", "XYZ Corp"])
 
 
 
 root = tk.Tk()
 root.title("User view history")
-root.geometry("750x500")
+root.geometry("750x750")
 
 tree = ttk.Treeview(root)
 
@@ -113,8 +105,5 @@ btn_return.grid(row=3, column=0)
 
 btn_delete = tk.Button(root, text="Delete item from history", command= delHistory)
 btn_delete.grid(row=4, column=0)
-
-# uncomment this line to create a test file. 
-createTestCSV()
 
 root.mainloop()
