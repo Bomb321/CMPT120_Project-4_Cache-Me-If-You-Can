@@ -7,19 +7,28 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import csv
 
+#Improvements
+#Live refresh in the searh box, and removed the search bar
+#Dynamically refreshing the CSV file when a request is rejected or accepted.
+#Added more error checking
+#Add A rejected requests csv file for all the deleted requests
+
 # This is the file name for the borrow requests don't change it without changing the file name (Also the create_csv(): function will need to be updated if you didn't make the csv yet)
 filePath = "borrowRequests.csv"
 
+# This is the file name for the rejected borrow requests
+rejectedFilePath = "rejectedRequests.csv"
+
 # Function to load all items from the file
-def openFile():
+def openFile(file_path=filePath):
     items = []
     try:
-        with open(filePath, mode='r') as file:
+        with open(file_path, mode='r') as file:
             read = csv.DictReader(file)
             for i in read:
                 items.append(i)
     except FileNotFoundError:
-        messagebox.showerror("File Not Found", "File not found. Contact cacheMeIfYouCan for help.")
+        messagebox.showerror("File Not Found", f"File {file_path} not found. Contact cacheMeIfYouCan for help.")
     return items
 
 # Function to update the status of an req
@@ -39,26 +48,36 @@ def updateStatus(reqID, newStatus):
 
     return updated
 
-# Function to delete a rejected request in the file
+# This deletes rejected requests and moves them to the rejected requests csv file
 def deleteRequest(reqID):
     items = openFile()
+    rejected_items = openFile(rejectedFilePath)
     with open(filePath, mode='w', newline='') as file:
         write = csv.DictWriter(file, fieldnames=["ID", "Name", "Producer", "Status"])
         write.writeheader()
 
         for req in items:
-            if req['ID'] != reqID or req['Status'] != "Rejected":
+            if req['ID'] == reqID and req['Status'] == "Rejected":
+                rejected_items.append(req)
+            else:
                 write.writerow(req)
 
+    with open(rejectedFilePath, mode='w', newline='') as file:
+        write = csv.DictWriter(file, fieldnames=["ID", "Name", "Producer", "Status"])
+        write.writeheader()
+        write.writerows(rejected_items)
+
 # Live refresh the treeview if edits are made to the csv file. Also this is where I found how to refresh because I forgot: https://stackoverflow.com/questions/76407618/how-to-refresh-data-in-treeview-in-tkinter row is replacing i.
-def refresh(tree):
+def refresh(tree, query=""):
     for row in tree.get_children():
         tree.delete(row)
 
     items = openFile()
+    if query:
+        items = [req for req in items if query.lower() in req["Name"].lower()]
+
     for req in items:
         tree.insert("", "end", values=(req["ID"], req["Name"], req["Producer"], req["Status"]))
-
 
 def buttonHandler(tree, action):
     selected = tree.selection()
@@ -66,16 +85,18 @@ def buttonHandler(tree, action):
         messagebox.showwarning("Error!", "Please select an req to perform this action.")
         return
 
-    reqID = tree.req(selected[0], "values")[0]
+    reqID = tree.item(selected[0], "values")[0]
     if action == "accept":
         newStatus = "Approved"
         if updateStatus(reqID, newStatus):
             messagebox.showinfo("Success", f"Request {reqID} accepted successfully.")
     else:  # this is essentially action == "reject"
+        updateStatus(reqID, "Rejected")
         deleteRequest(reqID)
         messagebox.showinfo("Success", f"Request {reqID} rejected and deleted successfully.")
     
     refresh(tree)
+
 # GUI 
 def main():
     root = tk.Tk()
@@ -89,7 +110,7 @@ def main():
     columns = ("ID", "Name", "Producer", "Status")
     tree = ttk.Treeview(root, columns=columns, show="headings")
     for col in columns:
-        tree.heading(col, text=col)
+        tree.heading(col, text=col, command=lambda _col=col: sortTreeview(tree, _col, False))
         tree.column(col, width=120)
     tree.pack(fill="both", padx=10, pady=10)
 
@@ -110,18 +131,15 @@ def main():
     searchArea.pack(side="left", padx=5)
     searchArea.current(0)
 
-    searchText = tk.Entry(searchFrame)
-    searchText.pack(side="left", padx=5)
+    dynamicSearch = tk.Entry(searchFrame)
+    dynamicSearch.pack(side="left", padx=5)
 
-    def searchRequests():
+    # dynamically search the treeview when the user types in the search box. Here is a link for where I found how to do this https://www.youtube.com/watch?v=mSpLnnXeiIc
+    def searchRequests(event=None):
         field = searchArea.get()
-        query = searchText.get().strip()
-        if not query:
-            messagebox.showwarning("Error!", "Search query cannot be empty.")
-            return
-
+        query = dynamicSearch.get().strip()
         items = openFile()
-        results = [req for req in items if req[field].lower() == query.lower()]
+        results = [req for req in items if query.lower() in req[field].lower()]
 
         for row in tree.get_children():
             tree.delete(row)
@@ -129,8 +147,7 @@ def main():
         for req in results:
             tree.insert("", "end", values=(req["ID"], req["Name"], req["Producer"], req["Status"]))
 
-    tk.Button(searchFrame, text="Search", command=searchRequests).pack(side="left", padx=5)
-
+    dynamicSearch.bind("<KeyRelease>", searchRequests) 
     tk.Button(root, text="Back to Main Menu", command=mainMenu).pack(pady=10)
 
     root.mainloop()
@@ -146,9 +163,13 @@ def createCSV():
             {"ID": "3", "Name": "Car", "Producer": "Ford", "Status": "Pending Approval"},
         ])
 
+    with open(rejectedFilePath, mode='w', newline='') as file:
+        write = csv.DictWriter(file, fieldnames=["ID", "Name", "Producer", "Status"])
+        write.writeheader()
 
 # Just uncomment this line to create the test CSV, you can only do this once though or you might run in to some annoying issues
-#create_csv()
+#createCSV()
 
 # Run the GUI
 main()
+
