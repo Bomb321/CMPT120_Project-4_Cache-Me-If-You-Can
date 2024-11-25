@@ -109,8 +109,6 @@ def requestToB(item=None):
             write.writerow([item["ID"], item["Name"], item["Producer"], BorB, f"{DurB} days", DateB,])
             
         messagebox.showinfo("Buy/Borrow list", "Item requested!")
-        print(f'BorB is equal to "{BorB}"')
-        print(f'DurB is equal to "{DurB}"')
     except Exception as errorName:
         messagebox.showerror("Error", f"An error occurred: {errorName}")
 
