@@ -61,10 +61,9 @@ tree.grid(row=0, column=0)
 
 
 
-#this function will loop back to the main menu
+#this is where main menu is called
 def mainMenu():
     root.destroy()
-#obviously this will change in the full version
 
 
 
