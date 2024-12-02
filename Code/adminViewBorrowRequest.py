@@ -14,7 +14,7 @@ import csv
 #Add A rejected requests csv file for all the deleted requests
 
 # This is the file name for the borrow requests don't change it without changing the file name (Also the create_csv(): function will need to be updated if you didn't make the csv yet)
-filePath = "borrowRequests.csv"
+filePath = "BorrowList.csv"
 
 # This is the file name for the rejected borrow requests
 rejectedFilePath = "rejectedRequests.csv"
