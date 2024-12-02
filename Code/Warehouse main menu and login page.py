@@ -237,9 +237,19 @@ def runApp():
     root = tk.Tk()
     root.title("Login")
     root.geometry("400x300")
+    
+    
+    def onclose():
+        messagebox.showinfo("Goodbye", "Thank you for using the program!")
+        root.destroy()
+    
+    root.protocol("WM_DELETE_WINDOW", on_close)
+    
     setupGui(root)
-    root.after(100, showWelcomeMessage)  
+    root.after(100, showWelcomeMessage) 
     root.mainloop()
 
 runApp()
+
+
 
