@@ -57,6 +57,16 @@ def searchItems(search_type, search_query):
 def refreshSearch():
     performSearch()
 
+# function that checks to see if user has requested >3 borrows
+def checkBList():
+     with open("BorrowList.csv", 'r') as file:
+        reader = csv.reader(file)
+        reqCount = sum(1 for row in reader)
+    if reqCount < 3:
+        CB = 0 
+    elif reqCount >=3:
+        CB = 1
+
 # Function to add an item to favorites and create or write to a csv file
 def addToFavorites(item=None):
     try:
@@ -82,6 +92,7 @@ def addToFavorites(item=None):
 # Below here is all code added by myself (Thomas) for the buy and borrow functions.
 
 def requestToB(item=None):
+    global CB
     try:
         if item is None:
             selected_item = resultsList.get(tk.ACTIVE)
@@ -94,23 +105,27 @@ def requestToB(item=None):
         BuyOrBorrowWindow()
         DateB = datetime.now()
         DateB = DateB.date()
-        with open("BorrowList.csv", "a", newline="") as file:
-            write = csv.writer(file)
-            if not fileExists:
-                write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request", "Approval by Admin"])
-            write.writerow([item["ID"], item["Name"], item["Producer"], BorB, f"{DurB} days", DateB, "PENDING"])
-                      
-        # this segment adds a copy to the user history list 
-        
-        with open("UserHistory.csv", "a", newline="") as file:
-            write = csv.writer(file)
-            if not fileExists:
-                write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request",])
-            write.writerow([item["ID"], item["Name"], item["Producer"], BorB, f"{DurB} days", DateB,])
+        if CB = 0:
+            with open("BorrowList.csv", "a", newline="") as file:
+                write = csv.writer(file)
+                if not fileExists:
+                    write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request", "Approval by Admin"])
+                write.writerow([item["ID"], item["Name"], item["Producer"], BorB, f"{DurB} days", DateB, "PENDING"])
+                          
+            # this segment adds a copy to the user history list 
             
-        messagebox.showinfo("Buy/Borrow list", "Item requested!")
-    except Exception as errorName:
-        messagebox.showerror("Error", f"An error occurred: {errorName}")
+            with open("UserHistory.csv", "a", newline="") as file:
+                write = csv.writer(file)
+                if not fileExists:
+                    write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request",])
+                write.writerow([item["ID"], item["Name"], item["Producer"], BorB, f"{DurB} days", DateB,])
+                
+            messagebox.showinfo("Buy/Borrow list", "Item requested!")
+        elif CB = 1:
+            messagebox.showinfo("Buy/Borrow list", "Request denied, you can only request 3 items at a time!")
+        
+        except Exception as errorName:
+            messagebox.showerror("Error", f"An error occurred: {errorName}")
 
 
 
