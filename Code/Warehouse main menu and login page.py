@@ -116,7 +116,6 @@ def displayProfile(currentUser):
     userType = "Admin" if currentUser == "admin" else "User"
     messagebox.showinfo("Profile Info", f"Username: {currentUser}\nType: {userType}")
 
-
 def addMenuFeatures(root, userType, currentUser):
     if userType == "admin":
         tk.Button(root, text="Log Out", command=lambda: logout(root)).pack()
@@ -181,15 +180,36 @@ def setupGui(root):
             widget.destroy()
 
         tk.Label(root, text=f"Menu - {userType.capitalize()}").pack()
-        if userType == "admin":
-            options = ["View Requests", "Add User", "Manage Stock"]
-        else:
-            options = ["View History", "Search Items", "Buy"]
 
-        for opt in options:
-            tk.Button(root, text=opt, command=lambda o=opt: messagebox.showinfo("Option", f"{o} clicked")).pack()
+        if userType == "admin":
+            tk.Button(root, text="View Requests", command=viewRequests).pack()
+            tk.Button(root, text="Add User", command=addUserFeature).pack()
+            tk.Button(root, text="Manage Stock", command=manageStock).pack()
+        else:
+            tk.Button(root, text="View History", command=viewHistory).pack()
+            tk.Button(root, text="Search Items", command=searchItems).pack()
+            tk.Button(root, text="Buy", command=buyItems).pack()
 
         addMenuFeatures(root, userType, currentUser)
+
+    # Placeholder functions for each feature
+    def viewRequests():
+        messagebox.showinfo("View Requests", "Placeholder for View Requests functionality.")
+
+    def addUserFeature():
+        messagebox.showinfo("Add User", "Placeholder for Add User functionality.")
+
+    def manageStock():
+        messagebox.showinfo("Manage Stock", "Placeholder for Manage Stock functionality.")
+
+    def viewHistory():
+        messagebox.showinfo("View History", "Placeholder for View History functionality.")
+
+    def searchItems():
+        messagebox.showinfo("Search Items", "Placeholder for Search Items functionality.")
+
+    def buyItems():
+        messagebox.showinfo("Buy Items", "Placeholder for Buy Items functionality.")
 
     tk.Label(root, text="Warehouse Login").pack()
     tk.Label(root, text="Username").pack()
