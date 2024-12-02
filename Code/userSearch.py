@@ -8,6 +8,8 @@ Date: 11/17/2024
 # Also I might display the search results vertically I just have to figure out how without breaking something.
 # I also plan on adding a refresh but not sure if it's nessesary. I added it to the borrowRequest.py file so I figured I might as well add it here.
 
+#Fix new error creates a duplicate of the csv file information when clearning the search area.
+
 #Added Refresh button, search results vertically instad of horizontally, and have a pop up for when adding to favorites.
 #Also made the GUI much better and a dynamic search bar that updates the search results as you type just like adminViewBorrowRequest.py
 
