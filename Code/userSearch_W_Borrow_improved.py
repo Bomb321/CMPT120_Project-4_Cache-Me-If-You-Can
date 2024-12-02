@@ -25,7 +25,7 @@ BorB = ""
 DurB = ""
 DateB = ""
 
-filePath = "userData.csv" #You can edit the name it doesn't matter
+filePath = "products.csv" #You can edit the name it doesn't matter
 
 # Function to create a favorites CSV file if it does not exist
 def createFavoritesCSV():
