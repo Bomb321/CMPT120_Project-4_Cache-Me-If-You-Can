@@ -8,23 +8,23 @@ import csv
 import datetime
 
 # Path to the CSV file
-CSV_Guest = "guest_users.csv"
+guestFile = "guestusers.csv"
 
 # Load user data from the CSV file
 def load_users_from_csv():
     try:
-        with open(CSV_FILE, mode="r") as file:
+        with open(guestFile, mode="r") as file:
             reader = csv.reader(file)
             for row in reader:
                 if len(row) == 2:  # Ensures rows have both username and password
                     user_database[row[0]] = row[1]
     except FileNotFoundError:
-        with open(CSV_FILE, mode="w") as file:  # Creates the file if it doesn't exist
+        with open(guestFile, mode="w") as file:  # Creates the file if it doesn't exist
             pass
 
 # Save user data to the CSV file
 def save_user_to_csv(username, password):
-    with open(CSV_FILE, mode="a", newline="") as file:
+    with open(guestFile, mode="a", newline="") as file:
         writer = csv.writer(file)
         writer.writerow([username, password])
 
