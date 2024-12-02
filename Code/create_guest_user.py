@@ -28,9 +28,9 @@ def save_user_to_csv(username, password):
         writer = csv.writer(file)
         writer.writerow([username, password])
 
-# User database (in-memory dictionary for session use)
+# User database 
 user_database = {}
-load_users_from_csv()  # Load data on program start
+load_users_from_csv() 
 
 def create_guest_user():
     username = username_entry.get().strip()
@@ -57,15 +57,15 @@ def display_date():
     current_date = datetime.datetime.now().strftime("%Y-%m-%d")
     messagebox.showinfo("Current Date", f"Today's date is: {current_date}")
 
+# This is where main menu is called
 def main_menu():
-    messagebox.showinfo("Main Menu", "Main menu functionality will be implemented here.")
     root.destroy()
 
-# Initialize the main window
+# Opens the main window
 root = tk.Tk()
 root.title("Guest User Creation")
 
-# Create and place widgets
+# Creates widgets
 tk.Label(root, text="Enter a Username:").grid(row=0, column=0, padx=10, pady=5, sticky="e")
 username_entry = tk.Entry(root, width=30)
 username_entry.grid(row=0, column=1, padx=10, pady=5)
@@ -86,5 +86,5 @@ date_button.grid(row=4, column=0, columnspan=2, pady=10)
 main_menu_button = tk.Button(root, text="Main Menu", command=main_menu)
 main_menu_button.grid(row=5, column=0, columnspan=2, pady=10)
 
-# Run the main event loop
+# Runs the main event loop
 root.mainloop()
