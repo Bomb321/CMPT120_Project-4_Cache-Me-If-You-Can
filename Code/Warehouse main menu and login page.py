@@ -54,7 +54,6 @@ def limitLoginAttempts(user):
     return True
 
 def viewLoginLog(root):
-    # Open a window to view login logs
     if not os.path.exists(loginLogFile):
         messagebox.showinfo("Info", "No login logs available.")
         return
@@ -79,33 +78,33 @@ def viewLoginLog(root):
     except Exception as e:
         messagebox.showerror("Error", f"Error reading login log: {e}")
 
-def resetPassword(root):
-    def updatePassword():
-        username = usernameEntry.get().strip()
-        oldPassword = oldPwEntry.get().strip()
-        newPassword = newPwEntry.get().strip()
+def register():
+    def addUser():
+        newUser = regUser.get().strip()
+        newPw = regPw.get().strip()
 
-        if username not in users or users[username] != oldPassword:
-            messagebox.showerror("Error", "Invalid username or old password.")
+        if not newUser or not newPw:
+            messagebox.showerror("Error", "Fill all fields!")
+        elif len(newPw) < 8:
+            messagebox.showerror("Error", "Password must be at least 8 characters long.")
+        elif newUser in users:
+            messagebox.showerror("Error", "User already exists!")
         else:
-            users[username] = newPassword
-            saveUser(username, newPassword)
-            messagebox.showinfo("Success", "Password updated successfully!")
-            resetWin.destroy()
+            users[newUser] = newPw
+            saveUser(newUser, newPw)
+            messagebox.showinfo("Success", "User registered successfully!")
+            regWin.destroy()
 
-    resetWin = tk.Toplevel(root)
-    resetWin.title("Reset Password")
-    resetWin.geometry("300x200")
-    tk.Label(resetWin, text="Username").pack()
-    usernameEntry = tk.Entry(resetWin)
-    usernameEntry.pack()
-    tk.Label(resetWin, text="Old Password").pack()
-    oldPwEntry = tk.Entry(resetWin, show="*")
-    oldPwEntry.pack()
-    tk.Label(resetWin, text="New Password").pack()
-    newPwEntry = tk.Entry(resetWin, show="*")
-    newPwEntry.pack()
-    tk.Button(resetWin, text="Update Password", command=updatePassword).pack()
+    regWin = tk.Toplevel(root)
+    regWin.title("Register")
+    regWin.geometry("300x200")
+    tk.Label(regWin, text="New Username").pack()
+    regUser = tk.Entry(regWin)
+    regUser.pack()
+    tk.Label(regWin, text="New Password (at least 8 characters)").pack()
+    regPw = tk.Entry(regWin, show="*")
+    regPw.pack()
+    tk.Button(regWin, text="Register", command=addUser).pack()
 
 def logout(root):
     for widget in root.winfo_children():
@@ -125,9 +124,26 @@ def addMenuFeatures(root, userType, currentUser):
         tk.Button(root, text="Log Out", command=lambda: logout(root)).pack()
         tk.Button(root, text="Display Profile", command=lambda: displayProfile(currentUser)).pack()
 
+def showMenu(userType, currentUser, root):  # Defined globally now
+    for widget in root.winfo_children():
+        widget.destroy()
+
+    tk.Label(root, text=f"Menu - {userType.capitalize()}").pack()
+
+    if userType == "admin":
+        tk.Button(root, text="View Requests", command=viewRequests).pack()
+        tk.Button(root, text="Add User", command=addUserFeature).pack()
+        tk.Button(root, text="Manage Stock", command=manageStock).pack()
+    else:
+        tk.Button(root, text="View History", command=viewHistory).pack()
+        tk.Button(root, text="Search Items", command=searchItems).pack()
+        tk.Button(root, text="Buy", command=buyItems).pack()
+
+    addMenuFeatures(root, userType, currentUser)
+
 def setupGui(root):
     adminUser = "admin"
-    adminPw = "1234"
+    adminPw = "admin1234"
     users[adminUser] = adminPw  # Add admin credentials by default
 
     def login():
@@ -145,72 +161,11 @@ def setupGui(root):
         else:
             logLogins(user, True)
             if user == adminUser:
-                showMenu("admin", user)
+                showMenu("admin", user, root)
             else:
-                showMenu("user", user)
+                showMenu("user", user, root)
 
-    def register():
-        def addUser():
-            newUser = regUser.get().strip()
-            newPw = regPw.get().strip()
-
-            if not newUser or not newPw:
-                messagebox.showerror("Error", "Fill all fields!")
-            elif newUser in users:
-                messagebox.showerror("Error", "User already exists!")
-            else:
-                users[newUser] = newPw
-                saveUser(newUser, newPw)
-                messagebox.showinfo("Success", "User registered successfully!")
-                regWin.destroy()
-
-        regWin = tk.Toplevel(root)
-        regWin.title("Register")
-        regWin.geometry("300x200")
-        tk.Label(regWin, text="New Username").pack()
-        regUser = tk.Entry(regWin)
-        regUser.pack()
-        tk.Label(regWin, text="New Password").pack()
-        regPw = tk.Entry(regWin, show="*")
-        regPw.pack()
-        tk.Button(regWin, text="Register", command=addUser).pack()
-
-    def showMenu(userType, currentUser):
-        for widget in root.winfo_children():
-            widget.destroy()
-
-        tk.Label(root, text=f"Menu - {userType.capitalize()}").pack()
-
-        if userType == "admin":
-            tk.Button(root, text="View Requests", command=viewRequests).pack()
-            tk.Button(root, text="Add User", command=addUserFeature).pack()
-            tk.Button(root, text="Manage Stock", command=manageStock).pack()
-        else:
-            tk.Button(root, text="View History", command=viewHistory).pack()
-            tk.Button(root, text="Search Items", command=searchItems).pack()
-            tk.Button(root, text="Buy", command=buyItems).pack()
-
-        addMenuFeatures(root, userType, currentUser)
-
-    # Placeholder functions for each feature
-    def viewRequests():
-        messagebox.showinfo("View Requests", "Placeholder for View Requests functionality.")
-
-    def addUserFeature():
-        messagebox.showinfo("Add User", "Placeholder for Add User functionality.")
-
-    def manageStock():
-        messagebox.showinfo("Manage Stock", "Placeholder for Manage Stock functionality.")
-
-    def viewHistory():
-        messagebox.showinfo("View History", "Placeholder for View History functionality.")
-
-    def searchItems():
-        messagebox.showinfo("Search Items", "Placeholder for Search Items functionality.")
-
-    def buyItems():
-        messagebox.showinfo("Buy Items", "Placeholder for Buy Items functionality.")
-
+    # Ensure that these elements are added to the root window only once
     tk.Label(root, text="Warehouse Login").pack()
     tk.Label(root, text="Username").pack()
     userEntry = tk.Entry(root)
@@ -218,9 +173,64 @@ def setupGui(root):
     tk.Label(root, text="Password").pack()
     pwEntry = tk.Entry(root, show="*")
     pwEntry.pack()
+
+    # Ensure buttons remain active and functional
     tk.Button(root, text="Login", command=login).pack()
     tk.Button(root, text="Register", command=register).pack()
     tk.Button(root, text="Reset Password", command=lambda: resetPassword(root)).pack()
+
+def resetPassword(root):
+    def updatePassword():
+        username = usernameEntry.get().strip()
+        oldPassword = oldPwEntry.get().strip()
+        newPassword = newPwEntry.get().strip()
+
+        if username not in users or users[username] != oldPassword:
+            messagebox.showerror("Error", "Invalid username or old password.")
+        elif len(newPassword) < 8:
+            messagebox.showerror("Error", "Password must be at least 8 characters long.")
+        else:
+            users[username] = newPassword
+            saveUser(username, newPassword)
+            messagebox.showinfo("Success", "Password updated successfully!")
+            resetWin.destroy()
+
+    resetWin = tk.Toplevel(root)
+    resetWin.title("Reset Password")
+    resetWin.geometry("300x200")
+    tk.Label(resetWin, text="Username").pack()
+    usernameEntry = tk.Entry(resetWin)
+    usernameEntry.pack()
+    tk.Label(resetWin, text="Old Password").pack()
+    oldPwEntry = tk.Entry(resetWin, show="*")
+    oldPwEntry.pack()
+    tk.Label(resetWin, text="New Password (at least 8 characters)").pack()
+    newPwEntry = tk.Entry(resetWin, show="*")
+    newPwEntry.pack()
+    tk.Button(resetWin, text="Update Password", command=updatePassword).pack()
+
+# Define the missing functions globally
+def viewRequests():
+    messagebox.showinfo("View Requests", "Placeholder for View Requests functionality.")
+
+def addUserFeature():
+    messagebox.showinfo("Add User", "Placeholder for Add User functionality.")
+
+def manageStock():
+    messagebox.showinfo("Manage Stock", "Placeholder for Manage Stock functionality.")
+
+def searchItems():
+    messagebox.showinfo("Search Items", "Placeholder for Search Items functionality.")
+
+def viewHistory():
+    messagebox.showinfo("View History", "Placeholder for View History functionality.")
+
+def buyItems():
+    messagebox.showinfo("Buy Items", "Placeholder for Buy Items functionality.")
+
+def showWelcomeMessage():
+    # Displays a welcome message when the application starts.
+    messagebox.showinfo("Welcome", "Welcome to the Warehouse Management System!\nPlease log in or register to proceed.")
 
 def runApp():
     loadUsers()
@@ -228,7 +238,8 @@ def runApp():
     root.title("Login")
     root.geometry("400x300")
     setupGui(root)
+    root.after(100, showWelcomeMessage)  
     root.mainloop()
 
-# Run the Application
 runApp()
+
