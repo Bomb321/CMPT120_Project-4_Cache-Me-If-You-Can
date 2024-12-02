@@ -65,9 +65,6 @@ tree.grid(row=0, column=0)
 def mainMenu():
     root.destroy()
 
-def Exit():
-    messagebox.showinfo("Exit Program","Exiting Program, thank you for using!")
-
 
 def delHistory():
     select_row = tree.selection()[0] #selected row
@@ -106,7 +103,6 @@ btn_return.grid(row=3, column=0)
 btn_delete = tk.Button(root, text="Delete item from history", command= delHistory)
 btn_delete.grid(row=4, column=0)
 
-btn_exit = tk.Button(root, text="Quit Program", command = Exit)
-btn_exit.grid(row=5, column=0)
+
 
 root.mainloop()
