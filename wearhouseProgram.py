@@ -664,13 +664,14 @@ def manageStock():
 # Start the warehouse management
     MainMenu()
 
-    def searchItems():
-    #messagebox.showinfo("Search Items", "Placeholder for Search Items functionality.")
-        BorB = ""
-        DurB = ""
-        DateB = ""
+def searchItems():
+    # Zach and Thomas' code
+    # here I am defining the global variables for the buy/borrow command so that they can be called later in the code
+    BorB = ""
+    DurB = ""
+    DateB = ""
 
-        filePath = "products.csv" #You can edit the name it doesn't matter
+    filePath = "products.csv" #You can edit the name it doesn't matter
 
     # Function to create a favorites CSV file if it does not exist
     def createFavoritesCSV():
@@ -683,15 +684,15 @@ def manageStock():
     def openFile():
         items = []
         try:
-           with open(filePath, newline='') as csvfile:
-               reader = csv.DictReader(csvfile)
-               for row in reader:
-                   items.append(row)
+            with open(filePath, newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    items.append(row)
         except FileNotFoundError:
             messagebox.showerror("File Error", f"The file {filePath} was not found.")
         except Exception as errorName:
             messagebox.showerror("Error", f"An error occurred: {errorName}")
-    return items
+        return items
 
     # Function to perform the search
     def searchItems(search_type, search_query):
@@ -701,16 +702,6 @@ def manageStock():
     # Function to refresh the search results
     def refreshSearch():
         performSearch()
-
-    # function that checks to see if user has requested >3 borrows
-    def checkBList():
-         with open("BorrowList.csv", 'r') as file:
-            reader = csv.reader(file)
-            reqCount = sum(1 for row in reader)
-            if reqCount < 3:
-                CB = 0 
-            elif reqCount >=3:
-                CB = 1
 
     # Function to add an item to favorites and create or write to a csv file
     def addToFavorites(item=None):
@@ -729,7 +720,7 @@ def manageStock():
                 if not fileExists:
                     write.writerow(["ID", "Name", "Producer"])
                 write.writerow([item["ID"], item["Name"], item["Producer"]])
-            
+        
             messagebox.showinfo("Favorites", "Item added to favorites successfully!")
         except Exception as errorName:
             messagebox.showerror("Error", f"An error occurred: {errorName}")
@@ -740,31 +731,32 @@ def manageStock():
         global CB
         try:
             if item is None:
-                selected_item = resultsList.get(tk.ACTIVE)
+                selected_item = tree.selection()
                 if not selected_item:
                     messagebox.showwarning("Error", "Please select an item to request")
                     return
                 item = dict(zip(["ID", "Name", "Producer"], [i.split(": ")[1] for i in selected_item.split(", ")]))
+        
             fileExists = os.path.exists("BorrowList.csv") 
             # commands to select whether to buy or borrow an item
             BuyOrBorrowWindow()
             DateB = datetime.now()
             DateB = DateB.date()
+        
             if CB == 0:
                 with open("BorrowList.csv", "a", newline="") as file:
                     write = csv.writer(file)
                     if not fileExists:
                         write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request", "Approval by Admin"])
                     write.writerow([item["ID"], item["Name"], item["Producer"], BorB, f"{DurB} days", DateB, "PENDING"])
-                              
+            
                 # this segment adds a copy to the user history list 
-                
                 with open("UserHistory.csv", "a", newline="") as file:
                     write = csv.writer(file)
                     if not fileExists:
-                        write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request",])
-                    write.writerow([item["ID"], item["Name"], item["Producer"], BorB, f"{DurB} days", DateB,])
-                    
+                        write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request"])
+                    write.writerow([item["ID"], item["Name"], item["Producer"], BorB, f"{DurB} days", DateB])
+                
                 messagebox.showinfo("Buy/Borrow list", "Item requested!")
             elif CB == 1:
                 messagebox.showinfo("Buy/Borrow list", "Request denied, you can only request 3 items at a time!")
@@ -772,9 +764,7 @@ def manageStock():
         except Exception as errorName:
             messagebox.showerror("Error", f"An error occurred: {errorName}")
 
-
-
-        
+    
     # creating a custom class for a 2 option window.
     class OptionsWindow(simpledialog.Dialog):
         def body(self, master):
@@ -783,12 +773,12 @@ def manageStock():
             tk.Button(master, text="Buy", command=BuyCmd).grid(row=1)
             tk.Button(master, text="Borrow", command=BorrowCmd).grid(row=2)
             tk.Label(master, text="Press OK to confirm your choice!").grid(row=3)
-            
+        
     # function to call the options window
     def BuyOrBorrowWindow():
         OptionsWindow(root, title="Buy or Borrow this item?")
 
-      
+  
     # fuctions for the buttons to buy or borrow -- and setting of the appropriate variables
     def BuyCmd():
         global BorB
@@ -802,11 +792,13 @@ def manageStock():
         DurB = simpledialog.askstring("Input","How many days would you like to borrow this item for?", parent = root)
 
 
-
-
+    #End of Thomas' code
 
     # Function to load all users from csv
     def loadAllUsers():
+        # Clear existing items first
+        for item in tree.get_children():
+            tree.delete(item)
         items = openFile()
         for item in items:
             tree.insert("", tk.END, values=(item["ID"], item["Name"], item["Producer"]))
@@ -816,25 +808,20 @@ def manageStock():
         search_type = searchOption.get()
         search_query = searchEntry.get().strip()
 
-        # Clear the tree view before loading all users
-        for row in tree.get_children():
-            tree.delete(row)
-
-        # This is because an issue happened that when the search was blank no items would show up
         if not search_query:
             loadAllUsers()
             return
 
         search_results = searchItems(search_type, search_query)
 
+        for row in tree.get_children():
+            tree.delete(row)
         for item in search_results:
             tree.insert("", tk.END, values=(item["ID"], item["Name"], item["Producer"]))
-            
+
     # Function to clear search and return to main menu
     def clearSearch():
         searchEntry.delete(0, tk.END)
-        for row in tree.get_children():
-            tree.delete(row)
         loadAllUsers()
 
     # Main application window you can rezie it if you want but this is pretty good size
@@ -870,9 +857,6 @@ def manageStock():
     tk.Button(buttonFrame, text="Refresh", command=refreshSearch).grid(row=0, column=2, padx=5)
     tk.Button(buttonFrame, text="Main Menu", command=root.destroy).grid(row=0, column=3, padx=5)
 
-    # Here is the button for requesting to search - Thomas
-    tk.Button(buttonframe, text="Request this Item", command=requestToB).grid(row=0, column=4, pdax=5)
-
     # Search results treeview
     treeFrame = tk.Frame(root)
     treeFrame.pack(pady=10, fill=tk.BOTH, expand=False)  
@@ -889,6 +873,23 @@ def manageStock():
 
     # Load all users for treeview
     loadAllUsers()
+
+    # This is me testing a CSV file format for the program
+    def createCSV():
+        with open(filePath, mode='w', newline='') as file:
+            write = csv.DictWriter(file, fieldnames=["ID", "Name", "Producer"])
+            write.writeheader()
+            write.writerows([
+                {"ID": "1", "Name": "Apple", "Producer": "Farm"},
+                {"ID": "2", "Name": "Book", "Producer": "Barnes & Noble"},
+                {"ID": "3", "Name": "Car", "Producer": "Ford"},
+            ])
+    # Just uncomment this line to create the test CSV, you can only do this once though or you might run in to some annoying issues
+    createCSV()
+
+    # Run the Application
+    root.mainloop()
+
 def viewHistory():
     # messagebox.showinfo("View History", "Placeholder for View History functionality.")
     filename = "UserHistory.csv"
@@ -1275,5 +1276,3 @@ def runApp():
     root.mainloop()
 
 runApp()
-
-
