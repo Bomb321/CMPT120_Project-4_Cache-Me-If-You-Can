@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import simpledialog 
 import csv
 import os
 from datetime import datetime
@@ -220,10 +221,308 @@ def manageStock():
     messagebox.showinfo("Manage Stock", "Placeholder for Manage Stock functionality.")
 
 def searchItems():
-    messagebox.showinfo("Search Items", "Placeholder for Search Items functionality.")
+    #messagebox.showinfo("Search Items", "Placeholder for Search Items functionality.")
+    BorB = ""
+    DurB = ""
+    DateB = ""
 
+    filePath = "products.csv" #You can edit the name it doesn't matter
+
+    # Function to create a favorites CSV file if it does not exist
+    def createFavoritesCSV():
+        if not os.path.exists("favorites.csv"):
+            with open("favorites.csv", "w", newline="") as file:
+                write = csv.writer(file)
+                write.writerow(["ID", "Name", "Producer"])
+
+    # Function to load all items from the file
+    def openFile():
+        items = []
+        try:
+            with open(filePath, newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    items.append(row)
+        except FileNotFoundError:
+            messagebox.showerror("File Error", f"The file {filePath} was not found.")
+        except Exception as errorName:
+            messagebox.showerror("Error", f"An error occurred: {errorName}")
+        return items
+
+    # Function to perform the search
+    def searchItems(search_type, search_query):
+        items = openFile()
+        return [item for item in items if item[search_type].lower() == search_query.lower()]
+
+    # Function to refresh the search results
+    def refreshSearch():
+        performSearch()
+
+    # function that checks to see if user has requested >3 borrows
+    def checkBList():
+         with open("BorrowList.csv", 'r') as file:
+            reader = csv.reader(file)
+            reqCount = sum(1 for row in reader)
+            if reqCount < 3:
+                CB = 0 
+            elif reqCount >=3:
+                CB = 1
+
+    # Function to add an item to favorites and create or write to a csv file
+    def addToFavorites(item=None):
+        try:
+            if item is None:
+                selected_item = tree.selection()
+                if not selected_item:
+                    messagebox.showwarning("Error", "Please select an item to add to favorites!")
+                    return
+                item_values = tree.item(selected_item[0], "values")
+                item = {"ID": item_values[0], "Name": item_values[1], "Producer": item_values[2]}
+
+            fileExists = os.path.exists("favorites.csv")
+            with open("favorites.csv", "a", newline="") as file:
+                write = csv.writer(file)
+                if not fileExists:
+                    write.writerow(["ID", "Name", "Producer"])
+                write.writerow([item["ID"], item["Name"], item["Producer"]])
+            
+            messagebox.showinfo("Favorites", "Item added to favorites successfully!")
+        except Exception as errorName:
+            messagebox.showerror("Error", f"An error occurred: {errorName}")
+
+    # Below here is all code added by myself (Thomas) for the buy and borrow functions.
+
+    def requestToB(item=None):
+        global CB
+        try:
+            if item is None:
+                selected_item = resultsList.get(tk.ACTIVE)
+                if not selected_item:
+                    messagebox.showwarning("Error", "Please select an item to request")
+                    return
+                item = dict(zip(["ID", "Name", "Producer"], [i.split(": ")[1] for i in selected_item.split(", ")]))
+            fileExists = os.path.exists("BorrowList.csv") 
+            # commands to select whether to buy or borrow an item
+            BuyOrBorrowWindow()
+            DateB = datetime.now()
+            DateB = DateB.date()
+            if CB == 0:
+                with open("BorrowList.csv", "a", newline="") as file:
+                    write = csv.writer(file)
+                    if not fileExists:
+                        write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request", "Approval by Admin"])
+                    write.writerow([item["ID"], item["Name"], item["Producer"], BorB, f"{DurB} days", DateB, "PENDING"])
+                              
+                # this segment adds a copy to the user history list 
+                
+                with open("UserHistory.csv", "a", newline="") as file:
+                    write = csv.writer(file)
+                    if not fileExists:
+                        write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request",])
+                    write.writerow([item["ID"], item["Name"], item["Producer"], BorB, f"{DurB} days", DateB,])
+                    
+                messagebox.showinfo("Buy/Borrow list", "Item requested!")
+            elif CB == 1:
+                messagebox.showinfo("Buy/Borrow list", "Request denied, you can only request 3 items at a time!")
+            
+        except Exception as errorName:
+            messagebox.showerror("Error", f"An error occurred: {errorName}")
+
+
+
+        
+    # creating a custom class for a 2 option window.
+    class OptionsWindow(simpledialog.Dialog):
+        def body(self, master):
+            self.result= None
+            tk.Label(master, text="Are you requesting this item to buy or to borrow?").grid(row=0)
+            tk.Button(master, text="Buy", command=BuyCmd).grid(row=1)
+            tk.Button(master, text="Borrow", command=BorrowCmd).grid(row=2)
+            tk.Label(master, text="Press OK to confirm your choice!").grid(row=3)
+            
+    # function to call the options window
+    def BuyOrBorrowWindow():
+        OptionsWindow(root, title="Buy or Borrow this item?")
+
+      
+    # fuctions for the buttons to buy or borrow -- and setting of the appropriate variables
+    def BuyCmd():
+        global BorB
+        global DurB
+        BorB = "Buy"
+        DurB = "N/A"
+    def BorrowCmd():
+        global BorB
+        global DurB
+        BorB = "Borrow"
+        DurB = simpledialog.askstring("Input","How many days would you like to borrow this item for?", parent = root)
+
+
+
+
+
+    # Function to load all users from csv
+    def loadAllUsers():
+        items = openFile()
+        for item in items:
+            tree.insert("", tk.END, values=(item["ID"], item["Name"], item["Producer"]))
+
+    # Function for the search button
+    def performSearch(event=None):
+        search_type = searchOption.get()
+        search_query = searchEntry.get().strip()
+
+        #This is because a issue happened that when the search was blank no items would show up
+        if not search_query:
+            loadAllUsers()  
+            return
+
+        search_results = searchItems(search_type, search_query)
+
+        for row in tree.get_children():
+            tree.delete(row)
+        for item in search_results:
+            tree.insert("", tk.END, values=(item["ID"], item["Name"], item["Producer"]))
+
+    # Function to clear search and return to main menu
+    def clearSearch():
+        searchEntry.delete(0, tk.END)
+        for row in tree.get_children():
+            tree.delete(row)
+        loadAllUsers()
+
+    # Main application window you can rezie it if you want but this is pretty good size
+    root = tk.Tk()
+    root.title("Regular User Search")
+    root.geometry("600x500")
+
+    # Search frame
+    searchFrame = tk.Frame(root)
+    searchFrame.pack(pady=10)
+
+    # Search Options/ buttons for diffrent types of data
+    tk.Label(searchFrame, text="Search By:").grid(row=0, column=0, padx=5)
+
+    searchOption = tk.StringVar(value="ID")
+    tk.Radiobutton(searchFrame, text="ID", variable=searchOption, value="ID").grid(row=0, column=1, padx=5)
+    tk.Radiobutton(searchFrame, text="Name", variable=searchOption, value="Name").grid(row=0, column=2, padx=5)
+    tk.Radiobutton(searchFrame, text="Producer", variable=searchOption, value="Producer").grid(row=0, column=3, padx=5)
+
+    # Search entry
+    tk.Label(searchFrame, text="Enter Search Query:").grid(row=1, column=0, padx=5)
+    searchEntry = tk.Entry(searchFrame)
+    searchEntry.grid(row=1, column=1, columnspan=3, padx=5, pady=5)
+    searchEntry.bind("<KeyRelease>", performSearch)  
+
+    # Here are all the cool buttons
+    buttonFrame = tk.Frame(root)
+    buttonFrame.pack(pady=10)
+
+    # Removed the search button
+    tk.Button(buttonFrame, text="Add to Favorites", command=addToFavorites).grid(row=0, column=0, padx=5)
+    tk.Button(buttonFrame, text="Clear Search", command=clearSearch).grid(row=0, column=1, padx=5)
+    tk.Button(buttonFrame, text="Refresh", command=refreshSearch).grid(row=0, column=2, padx=5)
+    tk.Button(buttonFrame, text="Main Menu", command=root.destroy).grid(row=0, column=3, padx=5)
+
+    # Here is the button for requesting to search - Thomas
+    tk.Button(buttonframe, text="Request this Item", command=requestToB).grid(row=0, column=4, pdax=5)
+
+    # Search results treeview
+    treeFrame = tk.Frame(root)
+    treeFrame.pack(pady=10, fill=tk.BOTH, expand=False)  
+
+    tree = ttk.Treeview(treeFrame, columns=("ID", "Name", "Producer"), show="headings", height=10) 
+    tree.heading("ID", text="ID")
+    tree.heading("Name", text="Name")
+    tree.heading("Producer", text="Producer")
+    tree.pack(side="left", fill=tk.BOTH, padx=10, pady=10) 
+
+    scrollbar = ttk.Scrollbar(treeFrame, orient="vertical", command=tree.yview)
+    tree.configure(yscroll=scrollbar.set)
+    scrollbar.pack(side="right", fill="y")
+
+    # Load all users for treeview
+    loadAllUsers()
 def viewHistory():
-    messagebox.showinfo("View History", "Placeholder for View History functionality.")
+    # messagebox.showinfo("View History", "Placeholder for View History functionality.")
+    filename = "UserHistory.csv"
+
+    root = tk.Tk()
+    root.title("User view history")
+    root.geometry("750x750")
+
+    tree = ttk.Treeview(root)
+
+    tree['columns'] = ['ID','Name','Producer','Buy or Borrow','Borrow Duration','Date of Request']
+    # columns
+    tree.column("#0", width=0, minwidth=0)
+    tree.column("ID", anchor="w", width=120, minwidth=25)
+    tree.column("Name", anchor="center", width=120, minwidth=25)
+    tree.column("Producer", anchor="w", width=120, minwidth=25)
+    tree.column("Buy or Borrow", anchor="w", width=120, minwidth=25)
+    tree.column("Borrow Duration", anchor="w", width=120, minwidth=25)
+    tree.column("Date of Request", anchor="w", width=120, minwidth=25)
+
+    #headings
+    tree.heading("#0", text="", anchor="w")
+    tree.heading("ID", text="Product ID", anchor="w")
+    tree.heading("Name", text="Product Name", anchor="center")
+    tree.heading("Producer", text="Product Producer", anchor="w")
+    tree.heading("Buy or Borrow", text="Buy or Borrow", anchor="w")
+    tree.heading("Borrow Duration", text="Borrow Duration", anchor="w")
+    tree.heading("Date of Request", text="Date of Request", anchor="e")
+
+    # Cearing the tree view (sub-function of refresh)
+    def ListClear():
+        for item in tree.get_children():
+            tree.delete(item)
+
+    # refreshing the tree view for edits made in other windows -- this is also called to instantly refresh the view after deleting an entry
+    def ListRefresh():
+        ListClear()
+        with open(filename, 'r',) as file:
+            reader = csv.reader(file)
+            for row in reader:
+                tree.insert("", "end", values=(row))
+
+    tree.grid(row=0, column=0)
+
+    #this is where main menu is called
+    def mainMenu():
+        root.destroy()
+
+    def delHistory():
+        select_row = tree.selection()[0] #selected row
+        RIndex = tree.index(select_row)
+        
+        
+        with open("UserHistory.csv","r") as file:
+            reader = csv.reader(file)
+            rows = list(reader)
+           
+        del rows[RIndex]
+        
+        # rewrites the file with 
+        with open("UserHistory.csv", "w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerows(rows)
+            
+        ListRefresh() #refreshes the list
+
+        messagebox.showinfo("History", "Item Deleted! Refresh List if change is not present")
+
+    tk.Label(root,text="Press refresh to see values.").grid(row=1, column=0)
+
+    btn_refresh = tk.Button(root, text="Refresh List", command= ListRefresh)
+    btn_refresh.grid(row=2, column=0)
+
+    btn_return = tk.Button(root, text="Return to Main Menu", command= mainMenu)
+    btn_return.grid(row=3, column=0)
+
+    btn_delete = tk.Button(root, text="Delete item from history", command= delHistory)
+    btn_delete.grid(row=4, column=0)
+
+    root.mainloop()
 
 def buyItems():
     messagebox.showinfo("Buy Items", "Placeholder for Buy Items functionality.")
@@ -243,7 +542,7 @@ def runApp():
         messagebox.showinfo("Goodbye", "Thank you for using the program!")
         root.destroy()
     
-    root.protocol("WM_DELETE_WINDOW", on_close)
+    root.protocol("WM_DELETE_WINDOW", onclose)
     
     setupGui(root)
     root.after(100, showWelcomeMessage) 
