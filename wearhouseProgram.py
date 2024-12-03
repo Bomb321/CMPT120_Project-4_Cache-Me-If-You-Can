@@ -378,10 +378,10 @@ def viewRequests():
 def addUserFeature():
     messagebox.showinfo("Add User", "Placeholder for Add User functionality.")
 
-    def manageStock():
+def manageStock():
     # Define the CSV file names
-        PRODUCT_CSV = 'products.csv'
-        HISTORY_CSV = 'product_history.csv'
+    PRODUCT_CSV = 'products.csv'
+    HISTORY_CSV = 'product_history.csv'
 
     # Ensure the CSV file and history file exist with proper headers if not already there
     def makecsv():
