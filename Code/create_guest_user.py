@@ -8,7 +8,7 @@ import csv
 import datetime
 
 # Path to the CSV file
-guestFile = "user_date.csv"
+guestFile = "user_data.csv"
 
 # Load user data from the CSV file
 def load_users_from_csv():
