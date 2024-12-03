@@ -369,7 +369,7 @@ def viewRequests():
             write.writeheader()
 
     # Just uncomment this line to create the test CSV, you can only do this once though or you might run in to some annoying issues
-    #createCSV()
+    createCSV()
 
     # Run the GUI
     main()
