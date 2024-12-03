@@ -80,7 +80,7 @@ def viewLoginLog(root):
     except Exception as e:
         messagebox.showerror("Error", f"Error reading login log: {e}")
 
-def register():
+def register(root):
     def addUser():
         newUser = regUser.get().strip()
         newPw = regPw.get().strip()
@@ -680,13 +680,13 @@ def manageStock():
                 write.writerow(["ID", "Name", "Producer"])
 
     # Function to load all items from the file
-     def openFile():
+    def openFile():
         items = []
-         try:
+        try:
            with open(filePath, newline='') as csvfile:
                reader = csv.DictReader(csvfile)
-                for row in reader:
-                    items.append(row)
+               for row in reader:
+                   items.append(row)
         except FileNotFoundError:
             messagebox.showerror("File Error", f"The file {filePath} was not found.")
         except Exception as errorName:
@@ -1275,4 +1275,5 @@ def runApp():
     root.mainloop()
 
 runApp()
+
 
