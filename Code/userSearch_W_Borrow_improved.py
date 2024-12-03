@@ -1,13 +1,14 @@
 '''
 Title: userSearch.py
 Author: Zachary Outman
-RequestToB and associated functions added by Thomas Weston
 Date: 11/17/2024
 '''
 # Sorry for getting a little lazy and not putting any of the buttons or boxes to the left or right and where, I had no idea where to put them.
 # I also didn't know what to put in the searchFrame so I just left it blank.
 # Also I might display the search results vertically I just have to figure out how without breaking something.
 # I also plan on adding a refresh but not sure if it's nessesary. I added it to the borrowRequest.py file so I figured I might as well add it here.
+
+#Fix new error creates a duplicate of the csv file information when clearning the search area.
 
 #Added Refresh button, search results vertically instad of horizontally, and have a pop up for when adding to favorites.
 #Also made the GUI much better and a dynamic search bar that updates the search results as you type just like adminViewBorrowRequest.py
@@ -57,16 +58,6 @@ def searchItems(search_type, search_query):
 def refreshSearch():
     performSearch()
 
-# function that checks to see if user has requested >3 borrows
-def checkBList():
-     with open("BorrowList.csv", 'r') as file:
-        reader = csv.reader(file)
-        reqCount = sum(1 for row in reader)
-    if reqCount < 3:
-        CB = 0 
-    elif reqCount >=3:
-        CB = 1
-
 # Function to add an item to favorites and create or write to a csv file
 def addToFavorites(item=None):
     try:
@@ -95,39 +86,38 @@ def requestToB(item=None):
     global CB
     try:
         if item is None:
-            selected_item = resultsList.get(tk.ACTIVE)
+            selected_item = tree.selection()
             if not selected_item:
                 messagebox.showwarning("Error", "Please select an item to request")
                 return
             item = dict(zip(["ID", "Name", "Producer"], [i.split(": ")[1] for i in selected_item.split(", ")]))
+        
         fileExists = os.path.exists("BorrowList.csv") 
         # commands to select whether to buy or borrow an item
         BuyOrBorrowWindow()
         DateB = datetime.now()
         DateB = DateB.date()
-        if CB = 0:
+        
+        if CB == 0:
             with open("BorrowList.csv", "a", newline="") as file:
                 write = csv.writer(file)
                 if not fileExists:
                     write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request", "Approval by Admin"])
                 write.writerow([item["ID"], item["Name"], item["Producer"], BorB, f"{DurB} days", DateB, "PENDING"])
-                          
-            # this segment adds a copy to the user history list 
             
+            # this segment adds a copy to the user history list 
             with open("UserHistory.csv", "a", newline="") as file:
                 write = csv.writer(file)
                 if not fileExists:
-                    write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request",])
-                write.writerow([item["ID"], item["Name"], item["Producer"], BorB, f"{DurB} days", DateB,])
+                    write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request"])
+                write.writerow([item["ID"], item["Name"], item["Producer"], BorB, f"{DurB} days", DateB])
                 
             messagebox.showinfo("Buy/Borrow list", "Item requested!")
-        elif CB = 1:
+        elif CB == 1:
             messagebox.showinfo("Buy/Borrow list", "Request denied, you can only request 3 items at a time!")
-        
-        except Exception as errorName:
-            messagebox.showerror("Error", f"An error occurred: {errorName}")
-
-
+            
+    except Exception as errorName:
+        messagebox.showerror("Error", f"An error occurred: {errorName}")
 
     
 # creating a custom class for a 2 option window.
@@ -157,11 +147,13 @@ def BorrowCmd():
     DurB = simpledialog.askstring("Input","How many days would you like to borrow this item for?", parent = root)
 
 
-
-
+#End of Thomas' code
 
 # Function to load all users from csv
 def loadAllUsers():
+    # Clear existing items first
+    for item in tree.get_children():
+        tree.delete(item)
     items = openFile()
     for item in items:
         tree.insert("", tk.END, values=(item["ID"], item["Name"], item["Producer"]))
@@ -171,9 +163,8 @@ def performSearch(event=None):
     search_type = searchOption.get()
     search_query = searchEntry.get().strip()
 
-    #This is because a issue happened that when the search was blank no items would show up
     if not search_query:
-        loadAllUsers()  
+        loadAllUsers()
         return
 
     search_results = searchItems(search_type, search_query)
@@ -186,8 +177,6 @@ def performSearch(event=None):
 # Function to clear search and return to main menu
 def clearSearch():
     searchEntry.delete(0, tk.END)
-    for row in tree.get_children():
-        tree.delete(row)
     loadAllUsers()
 
 # Main application window you can rezie it if you want but this is pretty good size
@@ -223,9 +212,6 @@ tk.Button(buttonFrame, text="Clear Search", command=clearSearch).grid(row=0, col
 tk.Button(buttonFrame, text="Refresh", command=refreshSearch).grid(row=0, column=2, padx=5)
 tk.Button(buttonFrame, text="Main Menu", command=root.destroy).grid(row=0, column=3, padx=5)
 
-# Here is the button for requesting to search - Thomas
-tk.Button(buttonframe, text="Request this Item" command=requestToB).grid(row=0, column=4, pdax=5)
-
 # Search results treeview
 treeFrame = tk.Frame(root)
 treeFrame.pack(pady=10, fill=tk.BOTH, expand=False)  
@@ -254,7 +240,7 @@ def createCSV():
             {"ID": "3", "Name": "Car", "Producer": "Ford"},
         ])
 # Just uncomment this line to create the test CSV, you can only do this once though or you might run in to some annoying issues
-#createCSV()
+createCSV()
 
 # Run the Application
 root.mainloop()
