@@ -178,7 +178,7 @@ def setupGui(root):
 
     # Ensure buttons remain active and functional
     tk.Button(root, text="Login", command=login).pack()
-    tk.Button(root, text="Register", command=register).pack()
+    tk.Button(root, text="Register", command=lambda: register(root)).pack()
     tk.Button(root, text="Reset Password", command=lambda: resetPassword(root)).pack()
 
 def resetPassword(root):
