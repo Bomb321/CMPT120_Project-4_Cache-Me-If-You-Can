@@ -533,18 +533,20 @@ def searchItems():
         search_type = searchOption.get()
         search_query = searchEntry.get().strip()
 
-        #This is because a issue happened that when the search was blank no items would show up
+        # Clear the tree view before loading all users
+        for row in tree.get_children():
+            tree.delete(row)
+
+        # This is because an issue happened that when the search was blank no items would show up
         if not search_query:
-            loadAllUsers()  
+            loadAllUsers()
             return
 
         search_results = searchItems(search_type, search_query)
 
-        for row in tree.get_children():
-            tree.delete(row)
         for item in search_results:
             tree.insert("", tk.END, values=(item["ID"], item["Name"], item["Producer"]))
-
+            
     # Function to clear search and return to main menu
     def clearSearch():
         searchEntry.delete(0, tk.END)
