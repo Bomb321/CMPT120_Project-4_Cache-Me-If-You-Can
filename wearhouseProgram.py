@@ -136,10 +136,12 @@ def showMenu(userType, currentUser, root):  # Defined globally now
         tk.Button(root, text="View Requests", command=viewRequests).pack()
         tk.Button(root, text="Add User", command=addUserFeature).pack()
         tk.Button(root, text="Manage Stock", command=manageStock).pack()
+        tk.Button(root, text="Remove User", command=RemoveUser).pack()
     else:
         tk.Button(root, text="View History", command=viewHistory).pack()
         tk.Button(root, text="Search Items", command=searchItems).pack()
         tk.Button(root, text="Buy", command=buyItems).pack()
+        tk.Button(root, text="View Favorites", command=viewFavorites).pack()
 
     addMenuFeatures(root, userType, currentUser)
 
