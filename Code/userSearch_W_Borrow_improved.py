@@ -52,7 +52,7 @@ def openFile():
 # Function to perform the search
 def searchItems(search_type, search_query):
     items = openFile()
-    return [item for item in items if item[search_type].lower() == search_query.lower()]
+    return [item for item in items if search_query.lower() in item[search_type].lower()]
 
 # Function to refresh the search results
 def refreshSearch():
