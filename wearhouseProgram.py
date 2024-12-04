@@ -140,7 +140,6 @@ def showMenu(userType, currentUser, root):  # Defined globally now
     else:
         tk.Button(root, text="View History", command=viewHistory).pack()
         tk.Button(root, text="Search Items", command=searchItems).pack()
-        tk.Button(root, text="Buy", command=buyItems).pack()
         tk.Button(root, text="View Favorites", command=viewFavorites).pack()
 
     addMenuFeatures(root, userType, currentUser)
@@ -475,6 +474,8 @@ def manageStock():
             with open(PRODUCT_CSV, mode='w', newline='') as file:
                 writer = csv.writer(file)
                 writer.writerow(['Product Name', 'Product ID', 'Producer'])  # Write headers
+                initial_products = ['Apple','1','Farm'],['Book','2','Barnes & Noble'],['Car','3','Ford']
+                writer.rows(initial_products)
 
         if not os.path.exists(HISTORY_CSV):
             with open(HISTORY_CSV, mode='w', newline='') as file:
@@ -731,13 +732,15 @@ def searchItems():
 
     def requestToB(item=None):
         global CB
+        CB = 0
         try:
             if item is None:
                 selected_item = tree.selection()
                 if not selected_item:
                     messagebox.showwarning("Error", "Please select an item to request")
                     return
-                item = dict(zip(["ID", "Name", "Producer"], [i.split(": ")[1] for i in selected_item.split(", ")]))
+                item_values = tree.item(selected_item[0], "values")
+                item = {"ID": item_values[0], "Name": item_values[1], "Producer": item_values[2]}
         
             fileExists = os.path.exists("BorrowList.csv") 
             # commands to select whether to buy or borrow an item
@@ -857,6 +860,7 @@ def searchItems():
     tk.Button(buttonFrame, text="Add to Favorites", command=addToFavorites).grid(row=0, column=0, padx=5)
     tk.Button(buttonFrame, text="Clear Search", command=clearSearch).grid(row=0, column=1, padx=5)
     tk.Button(buttonFrame, text="Refresh", command=refreshSearch).grid(row=0, column=2, padx=5)
+    tk.Button(buttonFrame, text="Buy/Borrow", command=requestToB).grid(row=0, column=4, padx=5)
     tk.Button(buttonFrame, text="Main Menu", command=root.destroy).grid(row=0, column=3, padx=5)
 
     # Search results treeview
