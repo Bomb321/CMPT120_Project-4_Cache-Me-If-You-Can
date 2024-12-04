@@ -378,7 +378,7 @@ def viewRequests():
     
 def addUserFeature():
     # Path to the CSV file
-    guestFile = "user_date.csv"
+    guestFile = "user_data.csv"
 
     # Load user data from the CSV file
     def load_users_from_csv():
@@ -591,6 +591,7 @@ def manageStock():
             except ValueError:
                 message("Please input a valid ID.")
 
+
         def delete():
             pid2 = pid.get()
             try:
@@ -700,7 +701,7 @@ def searchItems():
     # Function to perform the search
     def searchItems(search_type, search_query):
         items = openFile()
-        return [item for item in items if item[search_type].lower() == search_query.lower()]
+        return [item for item in items if  search_query.lower() == item[search_type].lower()]
 
     # Function to refresh the search results
     def refreshSearch():
@@ -732,6 +733,8 @@ def searchItems():
 
     def requestToB(item=None):
         global CB
+        global BorB
+        global DurB
         CB = 0
         try:
             if item is None:
@@ -753,7 +756,7 @@ def searchItems():
                     write = csv.writer(file)
                     if not fileExists:
                         write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request", "Approval by Admin"])
-                    write.writerow([item["ID"], item["Name"], item["Producer"], BorB, f"{DurB} days", DateB, "PENDING"])
+                    write.writerow([item["ID"], item["Name"], "PENDING"])
             
                 # this segment adds a copy to the user history list 
                 with open("UserHistory.csv", "a", newline="") as file:
@@ -978,7 +981,7 @@ def viewHistory():
     root.mainloop()
 
 def viewFavorites():
-    filename= 'Favorites.csv'
+    filename= 'favorites.csv'
 
     # GUI setup
     root = tk.Tk()
@@ -1001,6 +1004,10 @@ def viewFavorites():
     vsb.grid(row=0, column=1, sticky="ns")
     info_tree.configure(yscrollcommand=vsb.set)
 
+    def clearTreeview():
+        for item in info_tree.get_children():
+            info_tree.delete(item)
+
     # configure treeview widget and columns and headings
     info_tree.grid(row=2, column=0, columnspan=3, sticky="ew")
     info_tree.heading("Product ID", text="Product ID", command=lambda: sortTreeview("Product ID"))
@@ -1021,9 +1028,7 @@ def viewFavorites():
     sort_order = {'Product ID': False, 'Product Name': False, 'Product Producer': False}
 
     # helper function that clears the treeview
-    def clearTreeview():
-        for item in info_tree.get_children():
-            info_tree.delete(item)
+    
 
     def viewFavorites():
         # configure treeview widget and columns and headings
@@ -1128,11 +1133,12 @@ def viewFavorites():
 
 def RemoveUser():
     # File names for storing user data and removed user logs
-    USER_DATA_FILE = 'user_data.csv'
+    USER_DATA_FILE = 'users.csv'
     REMOVED_USERS_FILE = 'removed_users_log.csv'
 
     # Load user data from the CSV file
     def userdata():
+        global usernames, userpasswords, userroles
         if not os.path.exists(USER_DATA_FILE):
             return [], [], []  # returns empty lists if the file does not exist
     
@@ -1140,7 +1146,7 @@ def RemoveUser():
         with open(USER_DATA_FILE, mode='r', newline='') as file:
             reader = csv.reader(file)
             for row in reader:
-                if row:  # makes sure the row is not empty
+                if len(row) == 3:  # ensures the row has three elements
                     usernames.append(row[0])
                     passwords.append(row[1])
                     roles.append(row[2])
