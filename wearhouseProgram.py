@@ -109,6 +109,9 @@ def register(root):
     tk.Button(regWin, text="Register", command=addUser).pack()
 
 def logout(root):
+    USER_DATA_FILE = 'users.csv'
+    credFile = "users.csv"
+    guestFile = "users.csv"
     for widget in root.winfo_children():
         widget.destroy()
     setupGui(root)
@@ -378,7 +381,7 @@ def viewRequests():
     
 def addUserFeature():
     # Path to the CSV file
-    guestFile = "user_data.csv"
+    guestFile = "users.csv"
 
     # Load user data from the CSV file
     def load_users_from_csv():
@@ -1138,26 +1141,25 @@ def RemoveUser():
 
     # Load user data from the CSV file
     def userdata():
-        global usernames, userpasswords, userroles
+        global usernames, userpasswords
         if not os.path.exists(USER_DATA_FILE):
-            return [], [], []  # returns empty lists if the file does not exist
+            return [], [] # returns empty lists if the file does not exist
     
-        usernames, passwords, roles = [], [], []
+        usernames, passwords = [], []
         with open(USER_DATA_FILE, mode='r', newline='') as file:
             reader = csv.reader(file)
             for row in reader:
-                if len(row) == 3:  # ensures the row has three elements
+                if len(row) == 2:  # ensures the row has three elements
                     usernames.append(row[0])
                     passwords.append(row[1])
-                    roles.append(row[2])
-        return usernames, passwords, roles
+        return usernames, passwords
 
 # Save user data to the CSV file
     def savedata():
         with open(USER_DATA_FILE, mode='w', newline='') as file:
             writer = csv.writer(file)
             for i in range(len(usernames)):
-                writer.writerow([usernames[i], userpasswords[i], userroles[i]])
+                writer.writerow([usernames[i], userpasswords[i]])
 
 # Log removed user data
     def logremoved(username):
@@ -1166,7 +1168,7 @@ def RemoveUser():
             # Write the username and the timestamp of removal
             writer.writerow([username, datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
 
-    usernames, userpasswords, userroles = userdata()
+    usernames, userpasswords= userdata()
 
     def message(msg):
         messagebox.showinfo("Information", msg)
@@ -1177,7 +1179,6 @@ def RemoveUser():
             logremoved(username_to_remove)
         
             usernames.pop(num)
-            userroles.pop(num)
             userpasswords.pop(num)
             savedata()  # Save changes to the CSV file
             message(f"User '{username_to_remove}' has been removed.")
