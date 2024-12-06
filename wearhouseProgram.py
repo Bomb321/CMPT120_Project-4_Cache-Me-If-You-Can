@@ -373,7 +373,7 @@ def viewRequests():
             write.writeheader()
 
     # Just uncomment this line to create the test CSV, you can only do this once though or you might run in to some annoying issues
-    createCSV()
+    #createCSV()
 
     # Run the GUI
     main()
@@ -719,14 +719,14 @@ def searchItems():
                     messagebox.showwarning("Error", "Please select an item to add to favorites!")
                     return
                 item_values = tree.item(selected_item[0], "values")
-                item = {"ID": item_values[0], "Name": item_values[1], "Producer": item_values[2]}
+                item = {"Product ID": item_values[0], "Product Name": item_values[1], "Producer": item_values[2]}
 
             fileExists = os.path.exists("favorites.csv")
             with open("favorites.csv", "a", newline="") as file:
                 write = csv.writer(file)
                 if not fileExists:
-                    write.writerow(["ID", "Name", "Producer"])
-                write.writerow([item["ID"], item["Name"], item["Producer"]])
+                    write.writerow(["Product ID", "Product Name", "Producer"])
+                write.writerow([item["Product ID"], item["Product Name"], item["Producer"]])
         
             messagebox.showinfo("Favorites", "Item added to favorites successfully!")
         except Exception as errorName:
@@ -746,7 +746,7 @@ def searchItems():
                     messagebox.showwarning("Error", "Please select an item to request")
                     return
                 item_values = tree.item(selected_item[0], "values")
-                item = {"ID": item_values[0], "Name": item_values[1], "Producer": item_values[2]}
+                item = {"Product ID": item_values[0], "Product Name": item_values[1], "Producer": item_values[2]}
         
             fileExists = os.path.exists("BorrowList.csv") 
             # commands to select whether to buy or borrow an item
@@ -758,15 +758,15 @@ def searchItems():
                 with open("BorrowList.csv", "a", newline="") as file:
                     write = csv.writer(file)
                     if not fileExists:
-                        write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request", "Approval by Admin"])
-                    write.writerow([item["ID"], item["Name"], "PENDING"])
+                        write.writerow(["Product ID", "Product Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request", "Approval by Admin"])
+                    write.writerow([item["Product ID"], item["Product Name"], "PENDING"])
             
                 # this segment adds a copy to the user history list 
                 with open("UserHistory.csv", "a", newline="") as file:
                     write = csv.writer(file)
                     if not fileExists:
-                        write.writerow(["ID", "Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request"])
-                    write.writerow([item["ID"], item["Name"], item["Producer"], BorB, f"{DurB} days", DateB])
+                        write.writerow(["Product ID", "Product Name", "Producer", "Buy or borrow", "Borrow duration", "Date of request"])
+                    write.writerow([item["Product ID"], item["Product Name"], item["Producer"], BorB, f"{DurB} days", DateB])
                 
                 messagebox.showinfo("Buy/Borrow list", "Item requested!")
             elif CB == 1:
@@ -812,7 +812,7 @@ def searchItems():
             tree.delete(item)
         items = openFile()
         for item in items:
-            tree.insert("", tk.END, values=(item["ID"], item["Name"], item["Producer"]))
+            tree.insert("", tk.END, values=(item["Product ID"], item["Product Name"], item["Producer"]))
 
     # Function for the search button
     def performSearch(event=None):
@@ -828,7 +828,7 @@ def searchItems():
         for row in tree.get_children():
             tree.delete(row)
         for item in search_results:
-            tree.insert("", tk.END, values=(item["ID"], item["Name"], item["Producer"]))
+            tree.insert("", tk.END, values=(item["Product ID"], item["Product Name"], item["Producer"]))
 
     # Function to clear search and return to main menu
     def clearSearch():
@@ -847,9 +847,9 @@ def searchItems():
     # Search Options/ buttons for diffrent types of data
     tk.Label(searchFrame, text="Search By:").grid(row=0, column=0, padx=5)
 
-    searchOption = tk.StringVar(value="ID")
-    tk.Radiobutton(searchFrame, text="ID", variable=searchOption, value="ID").grid(row=0, column=1, padx=5)
-    tk.Radiobutton(searchFrame, text="Name", variable=searchOption, value="Name").grid(row=0, column=2, padx=5)
+    searchOption = tk.StringVar(value="Product ID")
+    tk.Radiobutton(searchFrame, text="Product ID", variable=searchOption, value="Product ID").grid(row=0, column=1, padx=5)
+    tk.Radiobutton(searchFrame, text="Product Name", variable=searchOption, value="Product Name").grid(row=0, column=2, padx=5)
     tk.Radiobutton(searchFrame, text="Producer", variable=searchOption, value="Producer").grid(row=0, column=3, padx=5)
 
     # Search entry
@@ -873,9 +873,9 @@ def searchItems():
     treeFrame = tk.Frame(root)
     treeFrame.pack(pady=10, fill=tk.BOTH, expand=False)  
 
-    tree = ttk.Treeview(treeFrame, columns=("ID", "Name", "Producer"), show="headings", height=10) 
-    tree.heading("ID", text="ID")
-    tree.heading("Name", text="Name")
+    tree = ttk.Treeview(treeFrame, columns=("Product ID", "Product Name", "Producer"), show="headings", height=10) 
+    tree.heading("Product ID", text="Product ID")
+    tree.heading("Product Name", text="Product Name")
     tree.heading("Producer", text="Producer")
     tree.pack(side="left", fill=tk.BOTH, padx=10, pady=10) 
 
@@ -889,15 +889,15 @@ def searchItems():
     # This is me testing a CSV file format for the program
     def createCSV():
         with open(filePath, mode='w', newline='') as file:
-            write = csv.DictWriter(file, fieldnames=["ID", "Name", "Producer"])
+            write = csv.DictWriter(file, fieldnames=["Product ID", "Product Name", "Producer"])
             write.writeheader()
             write.writerows([
-                {"ID": "1", "Name": "Apple", "Producer": "Farm"},
-                {"ID": "2", "Name": "Book", "Producer": "Barnes & Noble"},
-                {"ID": "3", "Name": "Car", "Producer": "Ford"},
+                {"Product ID": "1", "Product Name": "Apple", "Producer": "Farm"},
+                {"Product ID": "2", "Product Name": "Book", "Producer": "Barnes & Noble"},
+                {"Product ID": "3", "Product Name": "Car", "Producer": "Ford"},
             ])
     # Just uncomment this line to create the test CSV, you can only do this once though or you might run in to some annoying issues
-    createCSV()
+    #createCSV()
 
     # Run the Application
     root.mainloop()
