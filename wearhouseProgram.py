@@ -359,21 +359,24 @@ def viewRequests():
 
     # This is me testing a CSV file format for the program
     def createCSV():
-        with open(filePath, mode='w', newline='') as file:
-            write = csv.DictWriter(file, fieldnames=["ID", "Name", "Producer", "Status"])
-            write.writeheader()
-            write.writerows([
-                {"ID": "1", "Name": "Apple", "Producer": "Farm", "Status": "Pending Approval"},
-                {"ID": "2", "Name": "Book", "Producer": "Barnes & Noble", "Status": "Pending Approval"},
-                {"ID": "3", "Name": "Car", "Producer": "Ford", "Status": "Pending Approval"},
-            ])
+        if not os.path.exists(filePath):
+            with open(filePath, mode='w', newline='') as file:
+                write = csv.DictWriter(file, fieldnames=["ID", "Name", "Producer", "Status"])
+                write.writeheader()
+                write.writerows([
+                    {"ID": "1", "Name": "Apple", "Producer": "Farm", "Status": "Pending Approval"},
+                    {"ID": "2", "Name": "Book", "Producer": "Barnes & Noble", "Status": "Pending Approval"},
+                    {"ID": "3", "Name": "Car", "Producer": "Ford", "Status": "Pending Approval"},
+                ])
+        else:
+            print(f"{filePath} already exists. Skipping CSV creation.")
 
         with open(rejectedFilePath, mode='w', newline='') as file:
             write = csv.DictWriter(file, fieldnames=["ID", "Name", "Producer", "Status"])
             write.writeheader()
 
     # Just uncomment this line to create the test CSV, you can only do this once though or you might run in to some annoying issues
-    #createCSV()
+    createCSV()
 
     # Run the GUI
     main()
@@ -888,16 +891,19 @@ def searchItems():
 
     # This is me testing a CSV file format for the program
     def createCSV():
-        with open(filePath, mode='w', newline='') as file:
-            write = csv.DictWriter(file, fieldnames=["Product ID", "Product Name", "Producer"])
-            write.writeheader()
-            write.writerows([
-                {"Product ID": "1", "Product Name": "Apple", "Producer": "Farm"},
-                {"Product ID": "2", "Product Name": "Book", "Producer": "Barnes & Noble"},
-                {"Product ID": "3", "Product Name": "Car", "Producer": "Ford"},
-            ])
+        if not os.path.exists(filePath):
+            with open(filePath, mode='w', newline='') as file:
+                write = csv.DictWriter(file, fieldnames=["Product ID", "Product Name", "Producer"])
+                write.writeheader()
+                write.writerows([
+                    {"Product ID": "1", "Product Name": "Apple", "Producer": "Farm"},
+                    {"Product ID": "2", "Product Name": "Book", "Producer": "Barnes & Noble"},
+                    {"Product ID": "3", "Product Name": "Car", "Producer": "Ford"},
+                ])
+        else:
+            print(f"{filePath} already exists. Skipping CSV creation.")
     # Just uncomment this line to create the test CSV, you can only do this once though or you might run in to some annoying issues
-    #createCSV()
+    createCSV()
 
     # Run the Application
     root.mainloop()
